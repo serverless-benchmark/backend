@@ -1,0 +1,26 @@
+orbs:
+  aws-ecr: circleci/aws-ecr@6.1.0
+
+version: 2.1
+
+jobs:
+  deploy:
+    machine:
+      enabled: true
+    steps:
+      - run:
+          name: Deploy Over SSH
+          command: |
+            ssh ${SSH_USER}@${SSH_HOST} "/bin/bash ./deploy_app.sh"
+
+workflows:
+  build_push_and_deploy:
+    jobs:
+      - aws-ecr/build-and-push-image:
+          repo: ${AWS_REPOSITORY}
+      - deploy:
+          requires:
+            - aws-ecr/build-and-push-image
+          filters:
+            branches:
+              only: master
